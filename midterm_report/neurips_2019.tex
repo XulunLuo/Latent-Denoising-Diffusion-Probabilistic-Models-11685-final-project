@@ -18,7 +18,6 @@
   Tianxiang Wang \\
   Information Networking Institute\\
   Carnegie Mellon University\\
-  Pittsburgh, PA 15213 \\
   \texttt{jerry945666@gmail.com} \\
   \And
   [Partner Name] \\
@@ -53,14 +52,25 @@ Our qualitative objective is to implement four model variants in sequence: (1) D
 The primary beneficiaries are students, researchers, and practitioners who need clear, reproducible implementations for learning or deployment.
 
 \section{Related Work and Background}
+
 \subsection{Literature Review}
-% Rubric: Students cite 1–2 key papers related to their project, 
-% with brief connections to the problem.
-Students cite 1–2 key papers related to their project, with brief connections to the problem.
+
+Ho et al.~\cite{ho2020denoising} proposed DDPM, which trains a U-Net to
+iteratively denoise images. A key limitation is slow inference: generating one
+image requires 1000 steps. DDIM~\cite{song2020denoising} fixes this by using a
+deterministic update rule, cutting steps to 50--100 with no retraining needed.
+To reduce training cost, Rombach et al.~\cite{rombach2022highresolution}
+proposed running diffusion in the latent space of a VAE instead of pixel space.
+Finally, Ho and Salimans~\cite{ho2022classifierfree} showed that a single model
+can handle both conditional and unconditional generation by randomly dropping
+class labels during training, eliminating the need for a separate classifier.
 
 \subsection{Background}
-% Rubric: At least one cited paper connects the evaluation metric or baseline to the problem.
-At least one cited paper connects the evaluation metric or baseline to the problem.
+
+We use FID~\cite{heusel2017gans} to evaluate generation quality. FID compares
+the distribution of generated images to real images using features from an
+Inception-v3 network. Lower scores mean better quality. It is the standard
+metric, making it a natural choice for comparing our results.
 
 \section{Methodology}
 \subsection{Model Description}
