@@ -1,0 +1,18 @@
+ 
+# dataset
+imagenet100_128x128/
+
+# checkpoints
+pretrained/
+checkpoints/
+experiments/
+*.ckpt
+*.pth
+
+# python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# wandb
+wandb/
