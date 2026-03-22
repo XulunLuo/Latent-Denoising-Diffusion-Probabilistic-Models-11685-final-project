@@ -37,10 +37,20 @@
 \end{abstract}
 
 \section{Introduction}
+
 \subsection{Motivation and Objectives}
-% Rubric: Students articulate why the problem is important or who benefits 
-% and state at least one qualitative or quantitative objective.
-Students articulate why the problem is important or who benefits and state at least one qualitative or quantitative objective.
+
+Diffusion models have become a leading approach for image generation.
+
+This project has two main motivations. First, building diffusion models from scratch helps develop a deeper understanding of core components: noise scheduling, denoising networks, and inference procedures. Second, practical applications—such as data augmentation, medical imaging, and creative content generation—demand efficient and controllable implementations.
+
+Standard DDPM is slow at inference time. DDIM addresses this with fewer steps. Latent diffusion reduces memory by operating in a compressed space. Classifier-Free Guidance (CFG) adds class-conditional control. Together, these variants cover the key tradeoffs in the field.
+
+Our quantitative objective is to achieve a FID score below 50 on ImageNet-100 at $128 \times 128$ resolution. FID measures the similarity between generated and real image distributions, with lower values indicating higher quality.
+
+Our qualitative objective is to implement four model variants in sequence: (1) DDPM, (2) DDIM, (3) Latent DDPM, and (4) CFG. This progression builds a complete picture of modern diffusion pipelines.
+
+The primary beneficiaries are students, researchers, and practitioners who need clear, reproducible implementations for learning or deployment.
 
 \section{Related Work and Background}
 \subsection{Literature Review}
