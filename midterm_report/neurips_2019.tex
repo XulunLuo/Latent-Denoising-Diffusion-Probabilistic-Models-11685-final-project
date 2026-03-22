@@ -31,8 +31,13 @@
 \maketitle
 
 \begin{abstract}
-  % Rubric: The problem statement is understandable to non-experts.
-  The problem statement is understandable to non-experts.
+Diffusion models generate images by learning to remove noise step by step.
+In this project, we build four versions of diffusion models from scratch:
+DDPM, DDIM, Latent DDPM, and Classifier-Free Guidance (CFG).
+Each version improves on the last---faster inference, lower memory, or
+better control over what gets generated.
+We test on ImageNet-100 and aim for an FID score below 50,
+where lower means the generated images look more like real ones.
 \end{abstract}
 
 \section{Introduction}
