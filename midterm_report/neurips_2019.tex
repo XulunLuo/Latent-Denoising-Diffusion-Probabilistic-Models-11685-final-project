@@ -78,20 +78,51 @@ Inception-v3 network. Lower scores mean better quality. It is the standard
 metric, making it a natural choice for comparing our results.
 
 \section{Methodology}
+
 \subsection{Model Description}
-Basic explanation of the proposed model (inputs/outputs). Diagrams/tables encouraged.
+
+We implement four diffusion model variants, each building on the last.
+All use a U-Net as the denoising network.
+
+\textbf{DDPM:} Our baseline. We add noise to images over 1000 steps,
+then train a U-Net to reverse the process. Inference is slow since it
+requires all 1000 steps.
+
+\textbf{DDIM:} Same model as DDPM, but uses a deterministic update
+rule at inference. This cuts generation down to 50--100 steps with
+little quality loss.
+
+\textbf{Latent DDPM:} We compress images into a smaller latent space
+using a pre-trained VAE, then run DDPM there. This saves memory and
+speeds up training.
+
+\textbf{CFG:} We train one model for both conditional and unconditional
+generation by randomly dropping class labels (10\% of the time). At
+inference, we blend the two outputs to strengthen class-specific features.
 
 \subsection{Dataset}
-Data source is identified and basic preparation steps outlined.
+
+We use ImageNet-100 ($\sim$130k images, 100 classes), resized to
+$128 \times 128$ and normalized to $[-1, 1]$. Random horizontal flips
+are applied during training.
 
 \subsection{Evaluation Metric}
-The chosen metric is stated, with a simple explanation of its relevance.
+
+We use FID to compare the distributions of real and generated images
+via Inception-v3 features. Lower is better; we target FID $< 50$.
 
 \subsection{Loss Function}
-Mentioned briefly if applicable.
 
-\subsection{Experimental Depth and Iteration}
-Students present evidence of initial iterations (e.g., at least two runs, adjustments, or configurations attempted).
+We minimize MSE between the noise predicted by the U-Net and the
+true noise added during the forward process. For CFG, the class label
+is randomly replaced with a null token 10\% of the time during training.
+
+\subsection{Training Setup}
+
+Each model is trained in two configurations: a base run
+(lr $= 1{\times}10^{-4}$, batch size 64, 50 epochs) and a tuned run
+with adjusted hyperparameters based on initial results. We log loss
+and FID every 5 epochs and keep the best checkpoint.
 
 \section{Baseline and Extensions}
 \subsection{Baseline Selection and Evaluation (MANDATORY)}
