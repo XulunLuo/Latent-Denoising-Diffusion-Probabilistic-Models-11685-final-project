@@ -157,8 +157,14 @@ The model uses a 4-level U-Net with 64 base channels and 1000 diffusion steps.
 Inference uses 200 DDPM steps, targeting FID $< 50$.
 
 \subsection{Baseline Reproduction Evidence}
-
 Training successfully converged across 20 epochs with loss decreasing from 0.999 to $\sim 0.020$, demonstrating stable baseline performance. The final checkpoint is saved for DDIM evaluation.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.8\linewidth]{figures/ddpm_loss_curve.png}
+  \caption{Training loss curve of the DDPM baseline over 20 epochs on ImageNet-100. The loss decreases sharply in the first two epochs and stabilizes around 0.020, indicating successful convergence.}
+  \label{fig:ddpm_loss}
+\end{figure}
 
 \begin{figure}[h]
   \centering
