@@ -122,7 +122,7 @@ class DDPMPipeline:
         # TODO: use VQVAE to get final image
         if self.vae is not None:
             # NOTE: remember to rescale your images (undo the 0.1845 scaling applied during training)
-            image = self.vae.decode(image / 0.1845)
+            image = self.vae.decode(image.float() / 0.1845)
             # TODO: clamp your images values to valid range
             image = image.clamp(-1, 1)
 

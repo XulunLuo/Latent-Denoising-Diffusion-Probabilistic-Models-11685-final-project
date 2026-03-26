@@ -237,6 +237,21 @@ def main():
         unet_wo_ddp = unet
         class_embedder_wo_ddp = class_embedder  # None if not using CFG
     vae_wo_ddp = vae
+
+    # Resume from checkpoint if provided
+    start_epoch = 0
+    if args.ckpt is not None:
+        from utils import load_checkpoint
+        start_epoch = load_checkpoint(
+            unet_wo_ddp, scheduler, 
+            vae=vae_wo_ddp, 
+            class_embedder=class_embedder_wo_ddp, 
+            optimizer=optimizer, 
+            checkpoint_path=args.ckpt
+        )
+        start_epoch += 1  # start from next epoch
+        logger.info(f"Resumed from checkpoint: {args.ckpt}, starting at epoch {start_epoch}")
+
     # TODO: setup ddim scheduler for inference (separate from training noise scheduler)
     if args.use_ddim:
         scheduler_wo_ddp = DDIMScheduler(
@@ -288,7 +303,7 @@ def main():
     progress_bar = tqdm(range(args.max_train_steps), disable=not is_primary(args))
 
     # training
-    for epoch in range(args.num_epochs):
+    for epoch in range(start_epoch, args.num_epochs):
         
         # set epoch for distributed sampler, this is for distribution training
         if hasattr(train_loader.sampler, 'set_epoch'):

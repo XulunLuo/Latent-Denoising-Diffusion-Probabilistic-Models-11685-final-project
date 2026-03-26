@@ -146,9 +146,9 @@ def main():
         transforms.CenterCrop(args.image_size),
         transforms.ToTensor(),   # [0, 1]
     ])
-    val_dir = args.data_dir.replace('train', 'val')
+    val_dir = args.data_dir.replace('train', 'validation')
     val_dataset = datasets.ImageFolder(val_dir, transform=val_transform)
-    val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=50, shuffle=False, num_workers=4)
+    val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=50, shuffle=False, num_workers=0)
 
     # TODO: using torchmetrics for evaluation, check the documents of torchmetrics
     import torchmetrics
@@ -181,10 +181,17 @@ def main():
     is_mean, is_std = inception_score.compute()
     logger.info(f"FID: {fid_score:.4f}")
     logger.info(f"IS: {is_mean.item():.4f} ± {is_std.item():.4f}")
+
+    # Save results to a text file next to the checkpoint
+    results_path = os.path.join(os.path.dirname(args.ckpt), 'eval_results.txt')
+    with open(results_path, 'w') as f:
+        f.write(f"Checkpoint: {args.ckpt}\n")
+        f.write(f"DDIM: {args.use_ddim}, Steps: {args.num_inference_steps}\n")
+        f.write(f"Latent DDPM: {args.latent_ddpm}, CFG: {args.use_cfg}\n")
+        f.write(f"FID: {fid_score:.4f}\n")
+        f.write(f"IS: {is_mean.item():.4f} +/- {is_std.item():.4f}\n")
+    logger.info(f"Results saved to {results_path}")
     
         
-    
-
-
 if __name__ == '__main__':
     main()
