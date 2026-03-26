@@ -1,31 +1,32 @@
 \documentclass{article}
 
 \usepackage[final]{neurips_2019}
-\usepackage[utf8]{inputenc} 
-\usepackage[T1]{fontenc}    
-\usepackage{hyperref}       
-\usepackage{url}            
-\usepackage{booktabs}       
-\usepackage{amsfonts}       
-\usepackage{nicefrac}       
-\usepackage{microtype}      
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsfonts}
+\usepackage{nicefrac}
+\usepackage{microtype}
 \usepackage{graphicx}
 \usepackage{amsmath}
 
-\title{Midterm Report: [Your Project Title Here]}
+\title{Midterm Report: Latent Denoising Diffusion Probabilistic Models}
 
 \author{%
+  Xulun Luo \\
+  Carnegie Mellon University \\
+  \texttt{xulunl@andrew.cmu.edu} \\
+  \And
   Tianxiang Wang \\
-  Information Networking Institute\\
   Carnegie Mellon University\\
   \texttt{jerry945666@gmail.com} \\
   \And
-  [Partner Name] \\
-  [Department] \\
+  Xiaomeng Zhang \\
   Carnegie Mellon University \\
-  \texttt{[email]@andrew.cmu.edu} \\
+  \texttt{xz5@andrew.cmu.edu} \\
 }
-
 \begin{document}
 
 \maketitle
@@ -34,7 +35,7 @@
 Diffusion models generate images by learning to remove noise step by step.
 In this project, we build four versions of diffusion models from scratch:
 DDPM, DDIM, Latent DDPM, and Classifier-Free Guidance (CFG).
-Each version improves on the last---faster inference, lower memory, or
+Each version improves on the last. Faster inference, lower memory, or
 better control over what gets generated.
 We test on ImageNet-100 and aim for an FID score below 50,
 where lower means the generated images look more like real ones.
@@ -100,6 +101,31 @@ speeds up training.
 generation by randomly dropping class labels (10\% of the time). At
 inference, we blend the two outputs to strengthen class-specific features.
 
+\subsubsection{Diffusion Model Architectures and Hyper-parameters}
+Table~\ref{tab:model_architectures} summarizes the U-Net architectures and key hyper-parameters for DDPM and DDIM variants.
+
+\begin{table}[h]
+  \caption{Diffusion model architectures and hyper-parameters for DDPM and DDIM.}
+  \label{tab:model_architectures}
+  \centering
+  \begin{tabular}{lll}
+    \toprule
+    \textbf{Model} & \textbf{U-Net Architecture} & \textbf{Key Hyper-parameters} \\
+    \midrule
+    \textbf{DDPM} & 4 resolution levels              & Diffusion steps: 1000 \\
+                  & Base channels: 64                & Inference steps: 200 \\
+                  & Channel multipliers: [1, 2, 2, 4]& Learning rate: $1 \times 10^{-4}$ \\
+                  & Attention at level 3             & Batch size: 32 \\
+                  & 2 residual blocks/level          & Epochs: 20 \\
+    \midrule
+    \textbf{DDIM} & Same as DDPM (no retraining)     & Diffusion steps: 1000 \\
+                  & Deterministic update rule        & Same model weights as DDPM \\
+                  &                                  & Deterministic sampling \\
+
+    \bottomrule
+  \end{tabular}
+\end{table}
+
 \subsection{Dataset}
 
 We use ImageNet-100 ($\sim$130k images, 100 classes), resized to
@@ -109,7 +135,7 @@ are applied during training.
 \subsection{Evaluation Metric}
 
 We use FID to compare the distributions of real and generated images
-via Inception-v3 features. Lower is better; we target FID $< 50$.
+via Inception-v3 features. Lower is better. we target FID $< 50$.
 
 \subsection{Loss Function}
 
@@ -119,39 +145,82 @@ is randomly replaced with a null token 10\% of the time during training.
 
 \subsection{Training Setup}
 
-Each model is trained in two configurations: a base run
-(lr $= 1{\times}10^{-4}$, batch size 64, 50 epochs) and a tuned run
-with adjusted hyperparameters based on initial results. We log loss
-and FID every 5 epochs and keep the best checkpoint.
+We train our DDPM model for 20 epochs with batch size 32, learning rate $1 \times 10^{-4}$, on a single CUDA GPU.
 
 \section{Baseline and Extensions}
-\subsection{Baseline Selection and Evaluation (MANDATORY)}
-MANDATORY: Students implement and explain their chosen baseline.
+
+\subsection{Baseline Selection and Evaluation}
+
+We implement DDPM as our baseline model. DDPM is trained for 20 epochs with
+batch size 32, learning rate $1 \times 10^{-4}$, on ImageNet-100 at $128 \times 128$ resolution.
+The model uses a 4-level U-Net with 64 base channels and 1000 diffusion steps.
+Inference uses 200 DDPM steps, targeting FID $< 50$.
 
 \subsection{Baseline Reproduction Evidence}
-Students show initial results/plots confirming that their baseline results are their own.
+Training successfully converged across 20 epochs with loss decreasing from 0.999 to $\sim 0.020$, demonstrating stable baseline performance. The final checkpoint is saved for DDIM evaluation.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.8\linewidth]{figures/ddpm_loss_curve.png}
+  \caption{Training loss curve of the DDPM baseline over 20 epochs on ImageNet-100. The loss decreases sharply in the first two epochs and stabilizes around 0.020, indicating successful convergence.}
+  \label{fig:ddpm_loss}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.8\linewidth]{figures/ddpm_samples.png}
+  \caption{Samples generated by the DDPM baseline model on ImageNet-100 at $128 \times 128$ resolution. The images demonstrate that the model can generate diverse and semantically meaningful outputs after training.}
+  \label{fig:ddpm_samples}
+\end{figure}
 
 \subsection{Implemented Extensions/Experiments}
-High-level description of extensions/experiments to be conducted.
+We implemented DDIM as an alternative inference scheme compatible with the pre-trained DDPM weights. Unlike DDPM's stochastic sampling process, DDIM employs a deterministic update rule that allows for fewer inference steps, which theoretically enables significantly faster sampling while maintaining comparable generation quality.
 
 \section{Results and Analysis}
-Preliminary results or progress metrics encouraged (e.g., sample outputs or early plots).
+
+We trained DDPM on ImageNet-100 at $128 \times 128$ resolution for 20 epochs
+(approximately 6.5 hours on a single GPU). The training loss dropped sharply
+from 0.999 in the first step to around 0.020 by epoch 2, and remained stable
+for the rest of training. Full evaluation results will be included in the
+final report after further training.
 
 \section{Discussion}
-Students briefly discuss challenges so far and potential risks moving forward.
+
+The main challenges so far were Windows path issues and slow training speed.
+Long file paths with spaces caused data loading failures, which we fixed using
+a junction link. The initial training ran at 80 seconds per step due to
+self-attention operating at $32 \times 32$ resolution. we
+resolved this by reducing the U-Net channel size from 128 to 64 and
+restricting attention to $16 \times 16$ only, bringing speed down to 0.3
+seconds per step. Going forward, the main risk is that the smaller model may
+generate lower-quality images, but we expect this to be mitigated once we
+switch to Latent DDPM, where the full-size model becomes affordable by
+operating in a compressed $32 \times 32$ latent space.
 
 \section{Future Directions}
-Planned Next Steps: Students identify 2–3 specific actions to move forward.
+
+The next steps are Latent DDPM, CFG, and one advanced technique.
+For Latent DDPM, we will run diffusion in the compressed latent space of the
+pre-trained VAE, reducing training cost significantly.
+We will then add CFG to enable class-conditional generation by randomly
+dropping class labels during training.
+Finally, we plan to replace the linear noise schedule with a cosine schedule,
+which improves generation quality with minimal code changes.
 
 \section{Administrative Details}
 \subsection{Team Contributions}
-Provide basic role breakdown.
+
+\textbf{Xulun Luo:} Implemented part of the DDPM pipeline (noise scheduler, training loop, and inference components). Implemented all VAE encoding and decoding interfaces for latent DDPM training. Set up training infrastructure, debugged environment issues, and optimized the U-Net architecture for efficient single-GPU training. Ran baseline experiments and tracked results with Weights \& Biases.
+
+\textbf{Tianxiang Wang:} Conducted literature review and wrote the midterm report. Designed the baseline experiment and training details. Analyzed training results and identified optimization strategies for the U-Net architecture. Investigated evaluation metrics and planned future experiments.
+
+\textbf{Xiaomeng Zhang:} Implemented the DDPM baseline, including the scheduler, training pipeline, inference, configuration files, and DDPM pipeline.
 
 \subsection{GitHub}
-Include GitHub link.
+\url{https://github.com/XulunLuo/Latent-Denoising-Diffusion-Probabilistic-Models-11685-final-project}
 
 
-\section*{References}
+
 \small
 \bibliographystyle{plainnat}
 \bibliography{refs}
