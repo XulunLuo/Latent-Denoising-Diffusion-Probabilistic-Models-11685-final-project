@@ -7,7 +7,7 @@ def load_checkpoint(unet, scheduler, vae=None, class_embedder=None, optimizer=No
     checkpoint = torch.load(checkpoint_path, weights_only = False)
     
     print("loading unet")
-    unet.load_state_dict(checkpoint['unet_state_dict'])
+    unet.load_state_dict(checkpoint['unet_state_dict'], strict = False)
     print("loading scheduler")
     if 'scheduler_state_dict' in checkpoint:
         try:
@@ -25,7 +25,10 @@ def load_checkpoint(unet, scheduler, vae=None, class_embedder=None, optimizer=No
 
     if optimizer is not None and 'optimizer_state_dict' in checkpoint:
         print("loading optimizer")
-        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        try:
+            optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        except ValueError:
+            print("optimizer state dict mismatch, skipping.")
 
     return checkpoint.get('epoch', 0)
     

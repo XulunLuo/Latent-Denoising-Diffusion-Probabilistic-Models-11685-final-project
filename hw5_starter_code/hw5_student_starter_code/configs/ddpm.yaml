@@ -26,6 +26,6 @@ unet_ch_mult: [1, 2, 2, 4]
 unet_attn: [2, 3]
 unet_dropout: 0.0
 latent_ddpm: true
-use_cfg: false
+use_cfg: true
 use_ddim: false
-cfg_guidance_scale: 2.0
+cfg_guidance_scale: 7.5
