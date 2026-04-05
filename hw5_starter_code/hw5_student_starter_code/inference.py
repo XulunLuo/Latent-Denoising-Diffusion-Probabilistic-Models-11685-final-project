@@ -127,6 +127,9 @@ def main():
                 device=device,
             )
             all_images.extend(gen_images)
+            torch.cuda.empty_cache()
+            import gc
+            gc.collect() 
     else:
         # generate 5000 images
         batch_size = 50

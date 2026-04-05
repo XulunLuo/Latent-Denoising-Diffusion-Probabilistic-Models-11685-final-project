@@ -43,7 +43,17 @@ class DDPMScheduler(nn.Module):
         # TODO: calculate betas
         if self.beta_schedule == 'linear':
             # This is the DDPM implementation
-            betas = torch.linspace(beta_start, beta_end, num_train_timesteps, dtype=torch.float64)
+            betas = torch.linspace(beta_start, beta_end, num_train_timesteps, dtype = torch.float64)
+
+        elif self.beta_schedule == 'cosine':
+            # Cosine schedule from "Improved DDPM"
+            steps = num_train_timesteps + 1
+            t = torch.linspace(0, num_train_timesteps, steps, dtype=torch.float64) / num_train_timesteps
+            alphas_cumprod = torch.cos((t + 0.008) / 1.008 * torch.pi / 2) ** 2
+            alphas_cumprod = alphas_cumprod / alphas_cumprod[0]  # normalize so first value = 1
+            betas = 1 - (alphas_cumprod[1:] / alphas_cumprod[:-1])  # recover betas from alphas
+            betas = torch.clamp(betas, min=0, max=0.999)  # clip to prevent instability
+
         self.register_buffer("betas", betas)
 
         # TODO: calculate alphas
