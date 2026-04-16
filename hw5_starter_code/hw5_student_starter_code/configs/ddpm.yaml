@@ -1,11 +1,11 @@
-run_name: ddpm
+run_name: ddpm_cosine_cfg
 seed: 42
 data_dir: ./data/imagenet100_128x128/train
 image_size: 128
 batch_size: 16
 num_workers: 0
 num_classes: 100
-num_epochs: 800
+num_epochs: 600
 learning_rate: 0.0001
 weight_decay: 0.0
 num_train_timesteps: 1000
