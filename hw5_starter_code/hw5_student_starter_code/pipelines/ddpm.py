@@ -126,6 +126,9 @@ class DDPMPipeline:
             # TODO: clamp your images values to valid range
             image = image.clamp(-1, 1)
 
+            import torch.nn.functional as F
+            image = F.interpolate(image, size = (128, 128), mode = 'bilinear', align_corners = False)
+
         # TODO: return final image, re-scale from [-1, 1] to [0, 1]
         image = (image / 2 + 0.5).clamp(0, 1)
 

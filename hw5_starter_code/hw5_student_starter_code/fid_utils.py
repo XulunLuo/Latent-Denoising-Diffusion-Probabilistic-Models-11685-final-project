@@ -152,7 +152,8 @@ def extract_features_from_tensors(images, device='cuda', batch_size=64):
     all_features = []
     for i in tqdm(range(0, len(images), batch_size), desc="Inception features"):
         batch = images[i:i + batch_size].to(device)
-        features = model(batch)  # (B, 2048)
+        batch_uint8 = (batch * 255).byte()
+        features = model(batch_uint8)  # (B, 2048)
         all_features.append(features.cpu())
 
     features = torch.cat(all_features, dim=0).numpy()

@@ -113,32 +113,34 @@ def main():
     # TODO: with cfg, we generate 50 images per class
     all_images = []
     if args.use_cfg:
-        # generate 50 images per class
         for i in tqdm(range(args.num_classes)):
             logger.info(f"Generating 50 images for class {i}")
-            batch_size = 50
-            classes = torch.full((batch_size,), i, dtype=torch.long, device=device)
-            gen_images = pipeline(
-                batch_size=batch_size,
-                num_inference_steps=args.num_inference_steps,
-                classes=classes,
-                guidance_scale=args.cfg_guidance_scale,
-                generator=generator,
-                device=device,
-            )
-            all_images.extend(gen_images)
-            torch.cuda.empty_cache()
-            import gc
-            gc.collect() 
+            class_images = []
+            for _ in range(2):  # 2 batches of 25 = 50 total
+                batch_size = 25
+                classes = torch.full((batch_size,), i, dtype = torch.long, device = device)
+                gen_images = pipeline(
+                    batch_size = batch_size,
+                    num_inference_steps = args.num_inference_steps,
+                    classes = classes,
+                    guidance_scale = args.cfg_guidance_scale,
+                    generator = generator,
+                    device = device,
+                )
+                class_images.extend(gen_images)
+                torch.cuda.empty_cache()
+                import gc
+                gc.collect()
+            all_images.extend(class_images) 
     else:
         # generate 5000 images
         batch_size = 50
         for _ in tqdm(range(0, 5000, batch_size)):
             gen_images = pipeline(
-                batch_size=batch_size,
-                num_inference_steps=args.num_inference_steps,
-                generator=generator,
-                device=device,
+                batch_size = batch_size,
+                num_inference_steps = args.num_inference_steps,
+                generator = generator,
+                device = device,
             )
             all_images.extend(gen_images)
 
@@ -194,6 +196,21 @@ def main():
         f.write(f"FID: {fid_score:.4f}\n")
         f.write(f"IS: {is_mean.item():.4f} +/- {is_std.item():.4f}\n")
     logger.info(f"Results saved to {results_path}")
+
+    # Generate Kaggle submission
+    from generate_submission import generate_submission_from_tensors
+    import torchvision.transforms as T
+
+    # Convert PIL images back to tensors [0, 1]
+    to_tensor = T.ToTensor()
+    all_images_tensor = torch.stack([to_tensor(img) for img in all_images])
+
+    generate_submission_from_tensors(
+        all_images_tensor,
+        output_csv = "submission.csv",
+        device = device,
+        batch_size = 50,
+    )
     
         
 if __name__ == '__main__':
